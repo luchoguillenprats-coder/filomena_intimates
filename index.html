@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Filomena Pijamas — Registrar Venta</title>
+<style>
+  :root {
+    --rosa: #C2185B;
+    --rosa-dark: #880E4F;
+    --rosa-light: #FCE4EC;
+    --rosa-mid: #F48FB1;
+    --verde: #1B5E20;
+    --verde-light: #E8F5E9;
+    --naranja: #E65100;
+    --gris: #757575;
+    --gris-light: #F5F5F5;
+    --blanco: #FFFFFF;
+    --texto: #212121;
+    --borde: #E0E0E0;
+    --shadow: 0 2px 12px rgba(194,24,91,0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: linear-gradient(135deg, #FCE4EC 0%, #fff 60%);
+    min-height: 100vh;
+    padding: 0 0 40px;
+    color: var(--texto);
+  }
+
+  /* Header */
+  .header {
+    background: var(--rosa);
+    color: white;
+    padding: 20px 20px 24px;
+    text-align: center;
+    position: relative;
+  }
+  .header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .header p {
+    font-size: 13px;
+    opacity: 0.85;
+    margin-top: 4px;
+  }
+  .pijama-icon {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  /* Container */
+  .container {
+    max-width: 480px;
+    margin: -12px auto 0;
+    padding: 0 16px;
+  }
+
+  /* Card */
+  .card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--rosa);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+  }
+
+  /* Buscador */
+  .search-wrap { position: relative; }
+  .search-wrap input {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    border: 1.5px solid var(--borde);
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+    background: var(--gris-light);
+  }
+  .search-wrap input:focus { border-color: var(--rosa); background: white; }
+  .search-icon {
+    position: absolute;
+    left: 13px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--gris);
+    font-size: 16px;
+    pointer-events: none;
+  }
+
+  /* Lista de resultados */
+  .results {
+    margin-top: 10px;
+    max-height: 280px;
+    overflow-y: auto;
+    border-radius: 10px;
+    border: 1.5px solid var(--borde);
+    display: none;
+  }
+  .results.open { display: block; }
+  .result-item {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--borde);
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .result-item:last-child { border-bottom: none; }
+  .result-item:hover, .result-item.selected { background: var(--rosa-light); }
+  .result-cod {
+    font-size: 11px;
+    background: var(--rosa);
+    color: white;
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-weight: 600;
+    min-width: 28px;
+    text-align: center;
+  }
+  .result-info { flex: 1; }
+  .result-nombre {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--texto);
+    line-height: 1.3;
+  }
+  .result-detalle {
+    font-size: 12px;
+    color: var(--gris);
+    margin-top: 2px;
+  }
+  .result-precio {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--verde);
+  }
+  .no-results {
+    padding: 20px;
+    text-align: center;
+    color: var(--gris);
+    font-size: 14px;
+  }
+
+  /* Item seleccionado */
+  .selected-item {
+    display: none;
+    background: var(--rosa-light);
+    border: 1.5px solid var(--rosa-mid);
+    border-radius: 12px;
+    padding: 14px;
+    margin-top: 12px;
+    position: relative;
+  }
+  .selected-item.visible { display: block; }
+  .selected-item .nombre {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--rosa-dark);
+    padding-right: 28px;
+  }
+  .selected-item .detalle {
+    font-size: 13px;
+    color: var(--gris);
+    margin-top: 4px;
+  }
+  .btn-quitar {
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: none;
+    background: var(--rosa);
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    line-height: 1;
+  }
+
+  /* Fecha */
+  .fecha-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .fecha-row label {
+    font-size: 14px;
+    color: var(--gris);
+    white-space: nowrap;
+  }
+  .fecha-row input[type="date"] {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1.5px solid var(--borde);
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+  }
+  .fecha-row input[type="date"]:focus { border-color: var(--rosa); }
+
+  /* Precio personalizado */
+  .precio-row {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .precio-row label { font-size: 14px; color: var(--gris); white-space: nowrap; }
+  .precio-row input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1.5px solid var(--borde);
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+  }
+  .precio-row input:focus { border-color: var(--rosa); }
+  .precio-hint {
+    font-size: 11px;
+    color: var(--gris);
+    margin-top: 5px;
+  }
+
+  /* Botón registrar */
+  .btn-registrar {
+    width: 100%;
+    padding: 16px;
+    background: var(--rosa);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.3px;
+    margin-top: 4px;
+  }
+  .btn-registrar:hover { background: var(--rosa-dark); }
+  .btn-registrar:active { transform: scale(0.98); }
+  .btn-registrar:disabled { background: #E0E0E0; color: #9E9E9E; cursor: not-allowed; transform: none; }
+
+  /* Feedback */
+  .feedback {
+    display: none;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 12px;
+    text-align: center;
+  }
+  .feedback.ok { background: var(--verde-light); color: var(--verde); display: block; }
+  .feedback.error { background: #FFEBEE; color: #B71C1C; display: block; }
+  .feedback.loading { background: var(--gris-light); color: var(--gris); display: block; }
+
+  /* Stock badge */
+  .stock-badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: var(--verde-light);
+    color: var(--verde);
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  /* Config panel */
+  .config-card {
+    background: #FFF8E1;
+    border: 1.5px solid #FFE082;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .config-card p { font-size: 13px; color: #5D4037; line-height: 1.5; }
+  .config-card input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid #FFE082;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-top: 8px;
+    font-family: monospace;
+    outline: none;
+    background: white;
+  }
+  .config-card input:focus { border-color: var(--rosa); }
+  .btn-guardar-url {
+    margin-top: 8px;
+    padding: 8px 16px;
+    background: var(--rosa);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  /* Scrollbar */
+  .results::-webkit-scrollbar { width: 6px; }
+  .results::-webkit-scrollbar-track { background: var(--gris-light); border-radius: 3px; }
+  .results::-webkit-scrollbar-thumb { background: var(--rosa-mid); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="pijama-icon">🩷</span>
+  <h1>Filomena Pijamas</h1>
+  <p>Registrar venta</p>
+</div>
+
+<div class="container">
+
+  <!-- Panel de configuración (solo la primera vez) -->
+  <div class="config-card" id="configCard">
+    <p><strong>Paso único:</strong> Pegá la URL del Apps Script que obtuviste al implementar el script en Google Sheets.</p>
+    <input type="url" id="scriptUrl" placeholder="https://script.google.com/macros/s/..." />
+    <br>
+    <button class="btn-guardar-url" onclick="guardarUrl()">Guardar y conectar</button>
+  </div>
+
+  <!-- Buscador de pijama -->
+  <div class="card">
+    <div class="card-title">¿Qué vendiste?</div>
+
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        id="busqueda"
+        placeholder="Buscá por nombre o código..."
+        autocomplete="off"
+        oninput="filtrar()"
+        onfocus="mostrarResultados()"
+      />
+    </div>
+
+    <div class="results" id="results"></div>
+
+    <div class="selected-item" id="selectedItem">
+      <button class="btn-quitar" onclick="deseleccionar()">✕</button>
+      <div class="nombre" id="selNombre"></div>
+      <div class="detalle" id="selDetalle"></div>
+    </div>
+  </div>
+
+  <!-- Fecha y precio -->
+  <div class="card">
+    <div class="card-title">Detalles de la venta</div>
+
+    <div class="fecha-row">
+      <label>Fecha</label>
+      <input type="date" id="fecha" />
+    </div>
+
+    <div class="precio-row">
+      <label>Precio</label>
+      <input type="number" id="precioPersonalizado" placeholder="Dejar vacío = precio de lista" min="0" step="100" />
+    </div>
+    <p class="precio-hint">Solo completar si vendiste a un precio diferente al de lista.</p>
+  </div>
+
+  <!-- Botón -->
+  <button class="btn-registrar" id="btnRegistrar" onclick="registrarVenta()" disabled>
+    Registrar venta
+  </button>
+
+  <div class="feedback" id="feedback"></div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'filomena_script_url';
+let todosLosItems = [];
+let itemSeleccionado = null;
+
+// ── Inicializar ────────────────────────────────────────────────────────────────
+window.onload = () => {
+  // Fecha de hoy por defecto
+  const hoy = new Date();
+  const yyyy = hoy.getFullYear();
+  const mm = String(hoy.getMonth()+1).padStart(2,'0');
+  const dd = String(hoy.getDate()).padStart(2,'0');
+  document.getElementById('fecha').value = `${yyyy}-${mm}-${dd}`;
+
+  // Cargar URL guardada
+  const urlGuardada = localStorage.getItem(STORAGE_KEY);
+  if (urlGuardada) {
+    document.getElementById('configCard').style.display = 'none';
+    document.getElementById('scriptUrl').value = urlGuardada;
+    cargarPijamas(urlGuardada);
+  }
+};
+
+function guardarUrl() {
+  const url = document.getElementById('scriptUrl').value.trim();
+  if (!url.startsWith('https://script.google.com')) {
+    alert('La URL no parece válida. Debe empezar con https://script.google.com/macros/s/...');
+    return;
+  }
+  localStorage.setItem(STORAGE_KEY, url);
+  document.getElementById('configCard').style.display = 'none';
+  cargarPijamas(url);
+}
+
+function getUrl() {
+  return localStorage.getItem(STORAGE_KEY) || document.getElementById('scriptUrl').value.trim();
+}
+
+// ── Cargar pijamas en stock ────────────────────────────────────────────────────
+async function cargarPijamas(url) {
+  mostrarFeedback('Cargando pijamas en stock...', 'loading');
+  try {
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.ok) {
+      todosLosItems = data.items;
+      ocultarFeedback();
+    } else {
+      mostrarFeedback('Error al cargar: ' + data.error, 'error');
+    }
+  } catch(e) {
+    mostrarFeedback('No se pudo conectar con Google Sheets. Verificá la URL.', 'error');
+  }
+}
+
+// ── Buscador ───────────────────────────────────────────────────────────────────
+function filtrar() {
+  const q = document.getElementById('busqueda').value.trim().toLowerCase();
+  const resultsDiv = document.getElementById('results');
+
+  if (q.length < 1) {
+    resultsDiv.classList.remove('open');
+    return;
+  }
+
+  const filtrados = todosLosItems.filter(item =>
+    item.modelo.toLowerCase().includes(q) ||
+    String(item.cod).includes(q) ||
+    item.talle.toLowerCase().includes(q)
+  ).slice(0, 20);
+
+  if (filtrados.length === 0) {
+    resultsDiv.innerHTML = '<div class="no-results">No se encontraron pijamas con ese nombre</div>';
+  } else {
+    resultsDiv.innerHTML = filtrados.map(item => `
+      <div class="result-item" onclick="seleccionar(${item.cod})">
+        <div class="result-cod">${item.cod}</div>
+        <div class="result-info">
+          <div class="result-nombre">${item.modelo}</div>
+          <div class="result-detalle">Talle ${item.talle} · ${item.tienda}
+            <span class="stock-badge">${item.stock} en stock</span>
+          </div>
+        </div>
+        <div class="result-precio">$${item.pventa.toLocaleString('es-AR')}</div>
+      </div>
+    `).join('');
+  }
+
+  resultsDiv.classList.add('open');
+}
+
+function mostrarResultados() {
+  if (document.getElementById('busqueda').value.trim().length > 0) {
+    filtrar();
+  }
+}
+
+function seleccionar(cod) {
+  const item = todosLosItems.find(i => i.cod == cod);
+  if (!item) return;
+
+  itemSeleccionado = item;
+
+  document.getElementById('busqueda').value = item.modelo;
+  document.getElementById('results').classList.remove('open');
+
+  document.getElementById('selNombre').textContent = `${item.modelo} — Talle ${item.talle}`;
+  document.getElementById('selDetalle').innerHTML =
+    `Código ${item.cod} · ${item.tienda} · <strong>$${item.pventa.toLocaleString('es-AR')}</strong> · ${item.stock} en stock`;
+  document.getElementById('selectedItem').classList.add('visible');
+
+  document.getElementById('btnRegistrar').disabled = false;
+}
+
+function deseleccionar() {
+  itemSeleccionado = null;
+  document.getElementById('busqueda').value = '';
+  document.getElementById('selectedItem').classList.remove('visible');
+  document.getElementById('btnRegistrar').disabled = true;
+  document.getElementById('results').classList.remove('open');
+}
+
+// Cerrar resultados al tocar afuera
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.search-wrap') && !e.target.closest('.results')) {
+    document.getElementById('results').classList.remove('open');
+  }
+});
+
+// ── Registrar venta ────────────────────────────────────────────────────────────
+async function registrarVenta() {
+  if (!itemSeleccionado) return;
+
+  const fechaInput = document.getElementById('fecha').value;
+  if (!fechaInput) { alert('Seleccioná una fecha'); return; }
+
+  const partes = fechaInput.split('-');
+  const fechaFormato = `${partes[2]}/${partes[1]}/${partes[0]}`;
+
+  const precioRaw = document.getElementById('precioPersonalizado').value;
+  const precio = precioRaw ? parseInt(precioRaw) : 0;
+
+  const url = getUrl();
+  if (!url) { alert('Falta configurar la URL del script'); return; }
+
+  const btn = document.getElementById('btnRegistrar');
+  btn.disabled = true;
+  btn.textContent = 'Registrando...';
+  mostrarFeedback('Guardando en Google Sheets...', 'loading');
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({
+        cod:    itemSeleccionado.cod,
+        fecha:  fechaFormato,
+        pventa: precio
+      })
+    });
+    const data = await res.json();
+
+    if (data.ok) {
+      mostrarFeedback(`✅ ¡Venta registrada! "${itemSeleccionado.modelo}" — Talle ${itemSeleccionado.talle}`, 'ok');
+
+      // Actualizar stock local
+      itemSeleccionado.stock -= 1;
+      if (itemSeleccionado.stock <= 0) {
+        todosLosItems = todosLosItems.filter(i => i.cod !== itemSeleccionado.cod);
+      }
+
+      deseleccionar();
+      setTimeout(() => ocultarFeedback(), 4000);
+    } else {
+      mostrarFeedback('Error: ' + data.error, 'error');
+    }
+  } catch(e) {
+    mostrarFeedback('No se pudo conectar. Verificá tu conexión a internet.', 'error');
+  } finally {
+    btn.textContent = 'Registrar venta';
+    btn.disabled = !itemSeleccionado;
+  }
+}
+
+function mostrarFeedback(msg, tipo) {
+  const el = document.getElementById('feedback');
+  el.textContent = msg;
+  el.className = 'feedback ' + tipo;
+}
+
+function ocultarFeedback() {
+  document.getElementById('feedback').className = 'feedback';
+}
+</script>
+
+</body>
+</html>
